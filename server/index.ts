@@ -4,13 +4,13 @@ import { registerRoutes } from "./routes";
 
 const app = express();
 
-// ✅ CORS middleware - must be the very first middleware
+// ✅ Enable CORS for your frontend
 app.use(cors({
-  origin: "https://www.studyinuk.co", // your frontend domain
+  origin: "https://www.studyinuk.co", // replace with your frontend URL
   credentials: true,
 }));
 
-// ✅ Make sure to allow preflight requests (important for complex requests like POST with headers)
+// ✅ Handle preflight OPTIONS requests for CORS
 app.options('*', cors({
   origin: "https://www.studyinuk.co",
   credentials: true,
@@ -19,19 +19,16 @@ app.options('*', cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ⬇ Your custom logger or middleware can stay here
+// ✅ Request logging middleware (fixed block!)
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
-  // Your logic continues...
-});
 
-
-  const originalResJson = res.json;
+  const originalResJson = res.json.bind(res);
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    return originalResJson(bodyJson, ...args);
   };
 
   res.on("finish", () => {
@@ -41,11 +38,9 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       console.log(logLine);
     }
   });
@@ -64,7 +59,6 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Use PORT from environment (Render) or fallback to 5000 for development
   const port = parseInt(process.env.PORT || "5000");
   server.listen(port, "0.0.0.0", () => {
     console.log(`Backend server running on port ${port}`);
