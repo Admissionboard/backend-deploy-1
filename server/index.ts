@@ -1,20 +1,32 @@
-import cors from 'cors';
-import express, { type Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 
 const app = express();
+
+// ✅ CORS middleware - must be the very first middleware
 app.use(cors({
-  origin: 'https://www.studyinuk.co', // replace this with your real frontend domain
+  origin: "https://www.studyinuk.co", // your frontend domain
+  credentials: true,
+}));
+
+// ✅ Make sure to allow preflight requests (important for complex requests like POST with headers)
+app.options('*', cors({
+  origin: "https://www.studyinuk.co",
   credentials: true,
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// ⬇ Your custom logger or middleware can stay here
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  // Your logic continues...
+});
+
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
