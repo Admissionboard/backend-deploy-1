@@ -159,6 +159,48 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+async getCoursesPaginated(
+  filters: { search?: string; faculty?: string; level?: string; ieltsScore?: string },
+  limit: number,
+  offset: number
+): Promise<CourseWithUniversity[]> {
+  let query = db
+    .select()
+    .from(courses)
+    .leftJoin(universities, eq(courses.universityId, universities.id));
+
+  const conditions = [];
+
+  if (filters?.search) {
+    conditions.push(ilike(courses.name, `%${filters.search}%`));
+  }
+
+  if (filters?.faculty && filters.faculty !== "All Faculties") {
+    conditions.push(eq(courses.faculty, filters.faculty));
+  }
+
+  if (filters?.level && filters.level !== "All Levels") {
+    conditions.push(eq(courses.level, filters.level));
+  }
+
+  if (filters?.ieltsScore && filters.ieltsScore !== "All IELTS Scores") {
+    const numericScore = parseFloat(filters.ieltsScore);
+    conditions.push(eq(courses.ieltsOverall, numericScore.toString()));
+  }
+
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions));
+  }
+
+  query = query.limit(limit).offset(offset);
+
+  const result = await query;
+
+  return result.map((row) => ({
+    ...row.courses,
+    university: row.universities!,
+  }));
+}
   async getCourseById(id: number): Promise<CourseWithUniversity | undefined> {
     const [result] = await db
       .select()

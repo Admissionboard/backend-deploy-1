@@ -56,22 +56,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Course routes
-  app.get('/api/courses', async (req, res) => {
-    try {
-      const { search, faculty, level, ieltsScore } = req.query;
-      const filters = {
-        search: search as string,
-        faculty: faculty as string,
-        level: level as string,
-        ieltsScore: ieltsScore as string,
-      };
-      const courses = await storage.getCourses(filters);
-      res.json(courses);
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      res.status(500).json({ message: "Failed to fetch courses" });
-    }
-  });
+app.get('/api/courses', async (req, res) => {
+  try {
+    const { search, faculty, level, ieltsScore, limit, offset } = req.query;
+
+    const filters = {
+      search: search as string,
+      faculty: faculty as string,
+      level: level as string,
+      ieltsScore: ieltsScore as string,
+    };
+
+    const pageLimit = parseInt(limit as string) || 100;
+    const pageOffset = parseInt(offset as string) || 0;
+
+    const courses = await storage.getCoursesPaginated(filters, pageLimit, pageOffset);
+    res.json(courses);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ message: "Failed to fetch courses" });
+  }
+});
 
   app.get('/api/courses/:id', async (req, res) => {
     try {
