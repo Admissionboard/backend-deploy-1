@@ -79,6 +79,7 @@ app.get('/api/courses', async (req, res) => {
 });
 
   app.get('/api/courses/:id', async (req, res) => {
+    
     try {
       const id = parseInt(req.params.id);
       const course = await storage.getCourseById(id);
@@ -91,7 +92,23 @@ app.get('/api/courses', async (req, res) => {
       res.status(500).json({ message: "Failed to fetch course" });
     }
   });
+  // New API endpoint to fetch distinct values for filters
+  app.get('/api/courses/filters', async (req, res) => {
+    try {
+      const distinctFaculties = await storage.getDistinctFaculties();
+      const distinctLevels = await storage.getDistinctLevels();
+      const distinctIeltsScores = await storage.getDistinctIeltsScores();
 
+      res.json({
+        faculties: ["All Faculties", ...distinctFaculties],
+        levels: ["All Levels", ...distinctLevels],
+        ieltsScores: ["All IELTS Scores", ...distinctIeltsScores],
+      });
+    } catch (error) {
+      console.error("Error fetching filter values:", error);
+      res.status(500).json({ message: "Failed to fetch filter values" });
+    }
+  });
   // University routes
   app.get('/api/universities', async (req, res) => {
     try {

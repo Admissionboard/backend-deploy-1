@@ -216,6 +216,36 @@ async getCoursesPaginated(
     };
   }
 
+  import { asc, distinct, eq } from "drizzle-orm"; // Make sure this line is at the top
+
+// Inside the `storage` object/class:
+async getDistinctFaculties(): Promise<string[]> {
+  const result = await db
+    .selectDistinct({ faculty: courses.faculty })
+    .from(courses)
+    .where(eq(courses.faculty, courses.faculty)) // Ensures it's not null
+    .orderBy(asc(courses.faculty));
+  return result.map(r => r.faculty).filter(Boolean);
+},
+
+async getDistinctLevels(): Promise<string[]> {
+  const result = await db
+    .selectDistinct({ level: courses.level })
+    .from(courses)
+    .where(eq(courses.level, courses.level))
+    .orderBy(asc(courses.level));
+  return result.map(r => r.level).filter(Boolean);
+},
+
+async getDistinctIeltsScores(): Promise<string[]> {
+  const result = await db
+    .selectDistinct({ ieltsOverall: courses.ieltsOverall })
+    .from(courses)
+    .where(eq(courses.ieltsOverall, courses.ieltsOverall))
+    .orderBy(asc(courses.ieltsOverall));
+  return result.map(r => r.ieltsOverall?.toString()).filter(Boolean);
+},
+
   async createCourse(course: InsertCourse): Promise<Course> {
     const [created] = await db.insert(courses).values(course).returning();
     return created;
