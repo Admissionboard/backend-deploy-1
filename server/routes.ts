@@ -58,7 +58,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Course routes
 app.get('/api/courses', async (req, res) => {
   try {
-    const { search, faculty, level, ieltsScore, limit, offset } = req.query;
+    const { search, faculty, level, ieltsScore } = req.query;
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
 
     const filters = {
       search: search as string,
@@ -67,13 +69,10 @@ app.get('/api/courses', async (req, res) => {
       ieltsScore: ieltsScore as string,
     };
 
-    const pageLimit = parseInt(limit as string) || 100;
-    const pageOffset = parseInt(offset as string) || 0;
-
-    const courses = await storage.getCoursesPaginated(filters, pageLimit, pageOffset);
+    const courses = await storage.getCoursesPaginated(filters, limit, offset);
     res.json(courses);
   } catch (error) {
-    console.error("Error fetching courses:", error);
+    console.error("Error fetching paginated courses:", error);
     res.status(500).json({ message: "Failed to fetch courses" });
   }
 });
