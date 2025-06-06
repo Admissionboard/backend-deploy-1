@@ -210,27 +210,24 @@ async getDistinctFaculties(): Promise<string[]> {
   const result = await db
     .selectDistinct({ faculty: courses.faculty })
     .from(courses)
-    .where(courses.faculty.isNotNull())
     .orderBy(asc(courses.faculty));
-  return result.map(r => r.faculty).filter(Boolean);
+  return result.map((r) => r.faculty).filter(Boolean);
 }
 
 async getDistinctLevels(): Promise<string[]> {
   const result = await db
     .selectDistinct({ level: courses.level })
     .from(courses)
-    .where(courses.level.isNotNull())
     .orderBy(asc(courses.level));
-  return result.map(r => r.level).filter(Boolean);
+  return result.map((r) => r.level).filter(Boolean);
 }
 
 async getDistinctIeltsScores(): Promise<string[]> {
   const result = await db
     .selectDistinct({ ieltsOverall: courses.ieltsOverall })
     .from(courses)
-    .where(courses.ieltsOverall.isNotNull())
     .orderBy(asc(courses.ieltsOverall));
-  return result.map(r => r.ieltsOverall?.toString()).filter(Boolean);
+  return result.map((r) => r.ieltsOverall?.toString()).filter(Boolean);
 }
 
   async createCourse(course: InsertCourse): Promise<Course> {
