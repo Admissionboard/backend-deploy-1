@@ -55,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'Auth working', userId: req.user.id });
   });
 
-  // Course routes
+  // ✅ Course routes
 app.get('/api/courses', async (req, res) => {
   try {
     const { search, faculty, level, ieltsScore } = req.query;
@@ -77,37 +77,42 @@ app.get('/api/courses', async (req, res) => {
   }
 });
 
-  app.get('/api/courses/:id', async (req, res) => {
-    
-    try {
-      const id = parseInt(req.params.id);
-      const course = await storage.getCourseById(id);
-      if (!course) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-      res.json(course);
-    } catch (error) {
-      console.error("Error fetching course:", error);
-      res.status(500).json({ message: "Failed to fetch course" });
-    }
-  });
-  // New API endpoint to fetch distinct values for filters
-  app.get('/api/courses/filters', async (req, res) => {
-    try {
-      const distinctFaculties = await storage.getDistinctFaculties();
-      const distinctLevels = await storage.getDistinctLevels();
-      const distinctIeltsScores = await storage.getDistinctIeltsScores();
+// ✅ MUST come before `:id` route
+app.get('/api/courses/filters', async (req, res) => {
+  try {
+    const distinctFaculties = await storage.getDistinctFaculties();
+    const distinctLevels = await storage.getDistinctLevels();
+    const distinctIeltsScores = await storage.getDistinctIeltsScores();
 
-      res.json({
-        faculties: ["All Faculties", ...distinctFaculties],
-        levels: ["All Levels", ...distinctLevels],
-        ieltsScores: ["All IELTS Scores", ...distinctIeltsScores],
-      });
-    } catch (error) {
-      console.error("Error fetching filter values:", error);
-      res.status(500).json({ message: "Failed to fetch filter values" });
+    res.json({
+      faculties: ["All Faculties", ...distinctFaculties],
+      levels: ["All Levels", ...distinctLevels],
+      ieltsScores: ["All IELTS Scores", ...distinctIeltsScores],
+    });
+  } catch (error) {
+    console.error("Error fetching filter values:", error);
+    res.status(500).json({ message: "Failed to fetch filter values" });
+  }
+});
+
+// ✅ Always last — catch-all for course detail pages
+app.get('/api/courses/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid course ID" });
     }
-  });
+    const course = await storage.getCourseById(id);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    res.json(course);
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    res.status(500).json({ message: "Failed to fetch course" });
+  }
+});
+  
   // University routes
   app.get('/api/universities', async (req, res) => {
     try {
