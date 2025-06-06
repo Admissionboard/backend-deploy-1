@@ -201,21 +201,26 @@ app.get('/api/courses', async (req, res) => {
   });
 
   app.post('/api/favorites', async (req: any, res) => {
-    const { courseId } = req.body;
-    const course = await storage.getCourseById(parseInt(courseId));
-    
-    if (course) {
-      const favorite = {
-        id: Date.now(),
-        courseId: parseInt(courseId),
-        course: course
-      };
-      favoritesStore.set(courseId.toString(), favorite);
-      res.status(201).json(favorite);
-    } else {
-      res.status(404).json({ message: "Course not found" });
-    }
-  });
+  const { courseId } = req.body;
+
+  const parsedId = parseInt(courseId);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ message: "Invalid course ID" });
+  }
+
+  const course = await storage.getCourseById(parsedId);
+  if (course) {
+    const favorite = {
+      id: Date.now(),
+      courseId: parsedId,
+      course,
+    };
+    favoritesStore.set(courseId.toString(), favorite);
+    return res.status(201).json(favorite);
+  } else {
+    return res.status(404).json({ message: "Course not found" });
+  }
+});
 
   app.delete('/api/favorites/:courseId', async (req: any, res) => {
     const courseId = req.params.courseId;
