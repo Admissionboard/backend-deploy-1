@@ -27,16 +27,9 @@ import {
   type Tutorial,
   type InsertTutorial,
 } from "@shared/schema";
+
 import { db } from "./db";
 import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
-import { asc } from "drizzle-orm";
-
-async getTutorials(): Promise<Tutorial[]> {
-  return db
-    .select()
-    .from(tutorials)
-    .orderBy(asc(tutorials.category), asc(tutorials.order)); // ✅ ordered
-}
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -214,29 +207,29 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-async getDistinctFaculties(): Promise<string[]> {
-  const result = await db
-    .selectDistinct({ faculty: courses.faculty })
-    .from(courses)
-    .orderBy(asc(courses.faculty));
-  return result.map((r) => r.faculty).filter(Boolean);
-}
+  async getDistinctFaculties(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ faculty: courses.faculty })
+      .from(courses)
+      .orderBy(asc(courses.faculty));
+    return result.map((r) => r.faculty).filter(Boolean);
+  }
 
-async getDistinctLevels(): Promise<string[]> {
-  const result = await db
-    .selectDistinct({ level: courses.level })
-    .from(courses)
-    .orderBy(asc(courses.level));
-  return result.map((r) => r.level).filter(Boolean);
-}
+  async getDistinctLevels(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ level: courses.level })
+      .from(courses)
+      .orderBy(asc(courses.level));
+    return result.map((r) => r.level).filter(Boolean);
+  }
 
-async getDistinctIeltsScores(): Promise<string[]> {
-  const result = await db
-    .selectDistinct({ ieltsOverall: courses.ieltsOverall })
-    .from(courses)
-    .orderBy(asc(courses.ieltsOverall));
-  return result.map((r) => r.ieltsOverall?.toString()).filter(Boolean);
-}
+  async getDistinctIeltsScores(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ ieltsOverall: courses.ieltsOverall })
+      .from(courses)
+      .orderBy(asc(courses.ieltsOverall));
+    return result.map((r) => r.ieltsOverall?.toString()).filter(Boolean);
+  }
 
   async createCourse(course: InsertCourse): Promise<Course> {
     const [created] = await db.insert(courses).values(course).returning();
@@ -287,7 +280,6 @@ async getDistinctIeltsScores(): Promise<string[]> {
       .from(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.courseId, courseId)))
       .limit(1);
-
     return result.length > 0;
   }
 
@@ -371,7 +363,7 @@ async getDistinctIeltsScores(): Promise<string[]> {
       .select()
       .from(tutorials)
       .where(eq(tutorials.isActive, true))
-      .orderBy(desc(tutorials.createdAt));
+      .orderBy(asc(tutorials.category), asc(tutorials.order)); // ✅ Ordered inside category
   }
 
   async createTutorial(tutorial: InsertTutorial): Promise<Tutorial> {
