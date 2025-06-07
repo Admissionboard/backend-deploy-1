@@ -29,6 +29,14 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
+import { asc } from "drizzle-orm";
+
+async getTutorials(): Promise<Tutorial[]> {
+  return db
+    .select()
+    .from(tutorials)
+    .orderBy(asc(tutorials.category), asc(tutorials.order)); // ✅ ordered
+}
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
