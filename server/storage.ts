@@ -359,12 +359,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTutorials(): Promise<Tutorial[]> {
-    return await db
-      .select()
-      .from(tutorials)
-      .where(eq(tutorials.isActive, true))
-      .orderBy(asc(tutorials.category), asc(tutorials.order)); // ✅ Ordered inside category
-  }
+  return await db
+    .select()
+    .from(tutorials)
+    .where(eq(tutorials.isActive, true))
+    .orderBy(
+      asc(tutorials.category), 
+      asc(tutorials["order"])  // safer way to reference `order` field
+    );
+}
 
   async createTutorial(tutorial: InsertTutorial): Promise<Tutorial> {
     const [created] = await db.insert(tutorials).values(tutorial).returning();
