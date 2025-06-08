@@ -31,6 +31,7 @@ import {
 import { db } from "./db";
 import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
 
+
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
@@ -366,7 +367,7 @@ async getTutorials(): Promise<Tutorial[]> {
       .where(eq(tutorials.isActive, true))
       .orderBy(
         asc(tutorials.category),
-        asc(tutorials.order) // this works even if some order values are null
+        asc(tutorials.order) // ✅ no fallback logic inside asc()
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
