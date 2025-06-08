@@ -365,7 +365,10 @@ async getTutorials(): Promise<Tutorial[]> {
       .select()
       .from(tutorials)
       .where(eq(tutorials.isActive, true))
-      .orderBy(asc(tutorials.category), asc(tutorials.order));
+      .orderBy(
+        asc(tutorials.category),
+        asc(tutorials.order)
+      );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
     throw new Error("Failed to fetch tutorials");
