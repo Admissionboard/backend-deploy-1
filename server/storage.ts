@@ -358,7 +358,7 @@ export class DatabaseStorage implements IStorage {
     return result.length;
   }
 
-  async getTutorials(): Promise<Tutorial[]> {
+ async getTutorials(): Promise<Tutorial[]> {
   try {
     return await db
       .select()
@@ -366,7 +366,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tutorials.isActive, true))
       .orderBy(
         asc(tutorials.category),
-        asc(tutorials["order"] ?? 9999) // fallback if order is null
+        asc(tutorials.order)
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
