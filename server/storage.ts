@@ -30,6 +30,7 @@ import {
 
 import { db } from "./db";
 import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
+import { nullsLast } from "drizzle-orm"; // ✅ make sure this is imported
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -366,7 +367,7 @@ async getTutorials(): Promise<Tutorial[]> {
       .where(eq(tutorials.isActive, true))
       .orderBy(
         asc(tutorials.category),
-        asc(tutorials.order ?? 9999) // ✅ fallback for null order
+        nullsLast(asc(tutorials.order)) // ✅ fallback handled properly
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
