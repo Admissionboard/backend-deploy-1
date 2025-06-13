@@ -366,8 +366,8 @@ async getTutorials(): Promise<Tutorial[]> {
       .from(tutorials)
       .where(eq(tutorials.isActive, true))
       .orderBy(
-        asc(tutorials.category_order ?? 999), // ✅ Category sorting
-        asc(tutorials.order ?? 9999)          // ✅ Video order in category
+        asc(tutorials.category_order),
+        asc(tutorials.order)
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
