@@ -30,7 +30,6 @@ import {
 
 import { db } from "./db";
 import { eq, and, desc, ilike, inArray, gte, asc, sql } from "drizzle-orm";
-import { sql, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
