@@ -29,7 +29,8 @@ import {
 } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
+import { eq, and, desc, ilike, inArray, gte, asc, sql } from "drizzle-orm";
+import { sql, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -365,8 +366,8 @@ async getTutorials(): Promise<Tutorial[]> {
       .from(tutorials)
       .where(eq(tutorials.isActive, true))
       .orderBy(
-        asc(tutorials.category_order ?? 999), // ✅ Category sorting
-        asc(tutorials.order ?? 9999)          // ✅ Video order in category
+        sql`${tutorials.category_order} ASC`,
+        sql`${tutorials.order} ASC`
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
