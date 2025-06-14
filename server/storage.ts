@@ -29,8 +29,8 @@ import {
 } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
-
+import { eq, and, desc, ilike, inArray, gte, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -366,8 +366,8 @@ async getTutorials(): Promise<Tutorial[]> {
       .from(tutorials)
       .where(eq(tutorials.isActive, true))
       .orderBy(
-        asc(tutorials.category_order),
-        asc(tutorials.order)
+        sql`${tutorials.category_order} NULLS LAST`,
+        sql`${tutorials.order} NULLS LAST`
       );
   } catch (error) {
     console.error("Error fetching tutorials:", error);
