@@ -29,7 +29,7 @@ import {
 } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, and, desc, ilike, inArray, gte } from "drizzle-orm";
+import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
