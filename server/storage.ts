@@ -29,7 +29,7 @@ import {
 } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, and, desc, ilike, inArray, gte, sql } from "drizzle-orm";
+import { eq, and, desc, ilike, inArray, gte, asc, sql } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 export interface IStorage {
