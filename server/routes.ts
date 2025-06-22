@@ -197,48 +197,70 @@ app.get('/api/courses/:id', async (req, res) => {
     }
   });
 
-  // Simple in-memory favorites storage for demo
-  const favoritesStore = new Map();
+ // ✅ GET all favorites for the current user
+app.get('/api/favorites', async (req: any, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    if (!userId) return res.status(401).json({ message: "Missing user ID" });
 
-  app.get('/api/favorites', async (req: any, res) => {
-    const favorites = Array.from(favoritesStore.values());
+    const favorites = await storage.getUserFavorites(userId);
     res.json(favorites);
-  });
-
-  app.post('/api/favorites', async (req: any, res) => {
-  const { courseId } = req.body;
-
-  const parsedId = parseInt(courseId);
-  if (isNaN(parsedId)) {
-    return res.status(400).json({ message: "Invalid course ID" });
-  }
-
-  const course = await storage.getCourseById(parsedId);
-  if (course) {
-    const favorite = {
-      id: Date.now(),
-      courseId: parsedId,
-      course,
-    };
-    favoritesStore.set(courseId.toString(), favorite);
-    return res.status(201).json(favorite);
-  } else {
-    return res.status(404).json({ message: "Course not found" });
+  } catch (error) {
+    console.error("Error fetching favorites:", error);
+    res.status(500).json({ message: "Failed to fetch favorites" });
   }
 });
 
-  app.delete('/api/favorites/:courseId', async (req: any, res) => {
-    const courseId = req.params.courseId;
-    const deleted = favoritesStore.delete(courseId);
-    console.log(`Deleting favorite ${courseId}, success: ${deleted}, remaining:`, Array.from(favoritesStore.keys()));
-    res.status(200).json({ message: "Removed from favorites", deleted });
-  });
+// ✅ CHECK if course is favorited by this user
+app.get('/api/favorites/check/:courseId', async (req: any, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    const courseId = parseInt(req.params.courseId);
 
-  app.get('/api/favorites/check/:courseId', async (req: any, res) => {
-    const courseId = req.params.courseId;
-    const isFavorite = favoritesStore.has(courseId);
+    if (!userId) return res.status(401).json({ message: "Missing user ID" });
+
+    const isFavorite = await storage.isFavorite(userId, courseId);
     res.json({ isFavorite });
-  });
+  } catch (error) {
+    console.error("Error checking favorite:", error);
+    res.status(500).json({ message: "Failed to check favorite" });
+  }
+});
+
+// ✅ ADD a course to favorites
+app.post('/api/favorites', async (req: any, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    const { courseId } = req.body;
+
+    if (!userId) return res.status(401).json({ message: "Missing user ID" });
+
+    const parsedId = parseInt(courseId);
+    if (isNaN(parsedId)) return res.status(400).json({ message: "Invalid course ID" });
+
+    const favorite = await storage.addToFavorites(userId, parsedId);
+    res.status(201).json(favorite);
+  } catch (error) {
+    console.error("Error adding to favorites:", error);
+    res.status(500).json({ message: "Failed to add to favorites" });
+  }
+});
+
+// ✅ REMOVE a course from favorites
+app.delete('/api/favorites/:courseId', async (req: any, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+    const courseId = parseInt(req.params.courseId);
+
+    if (!userId) return res.status(401).json({ message: "Missing user ID" });
+
+    await storage.removeFromFavorites(userId, courseId);
+    res.status(200).json({ message: "Removed from favorites" });
+  } catch (error) {
+    console.error("Error removing from favorites:", error);
+    res.status(500).json({ message: "Failed to remove from favorites" });
+  }
+});
 
   // Notification routes
   app.get('/api/notifications', requireAuth, async (req: any, res) => {
