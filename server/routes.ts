@@ -229,21 +229,30 @@ app.get('/api/favorites/check/:courseId', async (req: any, res) => {
 
 // ✅ ADD a course to favorites
 app.post('/api/favorites', async (req: any, res) => {
-  try {
-    const userId = req.headers["x-user-id"];
-    const { courseId } = req.body;
+  const userId = req.headers["x-user-id"];
+  const { courseId } = req.body;
 
-    if (!userId) return res.status(401).json({ message: "Missing user ID" });
-
-    const parsedId = parseInt(courseId);
-    if (isNaN(parsedId)) return res.status(400).json({ message: "Invalid course ID" });
-
-    const favorite = await storage.addToFavorites(userId, parsedId);
-    res.status(201).json(favorite);
-  } catch (error) {
-    console.error("Error adding to favorites:", error);
-    res.status(500).json({ message: "Failed to add to favorites" });
+  if (!userId || !courseId) {
+    return res.status(400).json({ message: "Missing userId or courseId" });
   }
+
+  // Check if already favorited
+  const existing = await db
+    .select()
+    .from(favorites)
+    .where(and(eq(favorites.userId, userId), eq(favorites.courseId, courseId)));
+
+  if (existing.length > 0) {
+    return res.status(409).json({ message: "Already favorited" });
+  }
+
+  const newFavorite = await db.insert(favorites).values({
+    userId,
+    courseId,
+    createdAt: new Date(),
+  }).returning();
+
+  res.status(201).json(newFavorite[0]);
 });
 
 // ✅ REMOVE a course from favorites
