@@ -8,6 +8,7 @@ import { insertApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { adminDb } from "./db";
 import { db } from "./db";
+import { eq, and, desc, ilike, inArray, gte, asc } from "drizzle-orm";
 import { users, applications, courses, universities, favorites } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
