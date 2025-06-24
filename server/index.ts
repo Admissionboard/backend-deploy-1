@@ -7,12 +7,9 @@ const app = express();
 // ✅ Define allowed origins for production + local development
 const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:3000"];
 
-// ✅ CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like curl or mobile apps)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
       return callback(new Error("Not allowed by CORS"));
@@ -20,6 +17,26 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+app.options("*", cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
+// ✅ Allow all OPTIONS preflight responses
+app.options("*", (req, res) => {
+  res.set("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-user-id");
+  res.set("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
 // ✅ Handle preflight (OPTIONS) requests
 app.options("*", cors({

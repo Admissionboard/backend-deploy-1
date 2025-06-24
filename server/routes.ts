@@ -7,6 +7,7 @@ import { seedSampleData } from "./seed-data";
 import { insertApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { adminDb } from "./db";
+import { db } from "./db";
 import { users, applications, courses, universities } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -198,77 +199,74 @@ app.get('/api/courses/:id', async (req, res) => {
   });
 
  // ✅ GET all favorites for the current user
-app.get('/api/favorites', async (req: any, res) => {
-  try {
-    const userId = req.headers["x-user-id"];
-    if (!userId) return res.status(401).json({ message: "Missing user ID" });
+app.get("/api/favorites", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const favorites = await storage.getUserFavorites(userId);
-    res.json(favorites);
-  } catch (error) {
-    console.error("Error fetching favorites:", error);
-    res.status(500).json({ message: "Failed to fetch favorites" });
-  }
+  const userFavorites = await db
+    .select({
+      id: favorites.id,
+      course: {
+        id: courses.id,
+        name: courses.name,
+        level: courses.level,
+        duration: courses.duration,
+        tuitionFee: courses.tuitionFee,
+        ieltsOverall: courses.ieltsOverall,
+        university: {
+          id: universities.id,
+          name: universities.name,
+          city: universities.city,
+          country: universities.country,
+        },
+      },
+    })
+    .from(favorites)
+    .innerJoin(courses, eq(favorites.courseId, courses.id))
+    .innerJoin(universities, eq(courses.universityId, universities.id))
+    .where(eq(favorites.userId, userId));
+
+  res.json(userFavorites);
 });
 
-// ✅ CHECK if course is favorited by this user
-app.get('/api/favorites/check/:courseId', async (req: any, res) => {
-  try {
-    const userId = req.headers["x-user-id"];
-    const courseId = parseInt(req.params.courseId);
+app.post("/api/favorites", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    if (!userId) return res.status(401).json({ message: "Missing user ID" });
-
-    const isFavorite = await storage.isFavorite(userId, courseId);
-    res.json({ isFavorite });
-  } catch (error) {
-    console.error("Error checking favorite:", error);
-    res.status(500).json({ message: "Failed to check favorite" });
-  }
-});
-
-// ✅ ADD a course to favorites
-app.post('/api/favorites', async (req: any, res) => {
-  const userId = req.headers["x-user-id"];
   const { courseId } = req.body;
+  if (!courseId) return res.status(400).json({ message: "Missing courseId" });
 
-  if (!userId || !courseId) {
-    return res.status(400).json({ message: "Missing userId or courseId" });
-  }
-
-  // Check if already favorited
+  // Prevent duplicates
   const existing = await db
     .select()
     .from(favorites)
     .where(and(eq(favorites.userId, userId), eq(favorites.courseId, courseId)));
 
   if (existing.length > 0) {
-    return res.status(409).json({ message: "Already favorited" });
+    return res.status(200).json({ message: "Already favorited" });
   }
 
-  const newFavorite = await db.insert(favorites).values({
+  await db.insert(favorites).values({
     userId,
     courseId,
     createdAt: new Date(),
-  }).returning();
+  });
 
-  res.status(201).json(newFavorite[0]);
+  res.status(201).json({ message: "Added to favorites" });
 });
 
-// ✅ REMOVE a course from favorites
-app.delete('/api/favorites/:courseId', async (req: any, res) => {
-  try {
-    const userId = req.headers["x-user-id"];
-    const courseId = parseInt(req.params.courseId);
+app.delete("/api/favorites/:courseId", async (req, res) => {
+  const userId = req.headers["x-user-id"] as string;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    if (!userId) return res.status(401).json({ message: "Missing user ID" });
+  const courseId = parseInt(req.params.courseId);
+  if (isNaN(courseId)) return res.status(400).json({ message: "Invalid course ID" });
 
-    await storage.removeFromFavorites(userId, courseId);
-    res.status(200).json({ message: "Removed from favorites" });
-  } catch (error) {
-    console.error("Error removing from favorites:", error);
-    res.status(500).json({ message: "Failed to remove from favorites" });
-  }
+  await db
+    .delete(favorites)
+    .where(and(eq(favorites.userId, userId), eq(favorites.courseId, courseId)));
+
+  res.status(200).json({ message: "Removed from favorites" });
 });
 
   // Notification routes
