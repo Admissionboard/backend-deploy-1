@@ -9,7 +9,8 @@ const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:3000"];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true); // allow curl, mobile apps
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
       return callback(new Error("Not allowed by CORS"));
@@ -20,7 +21,8 @@ app.use(cors({
 
 app.options("*", cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
       return callback(new Error("Not allowed by CORS"));

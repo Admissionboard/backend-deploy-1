@@ -8,7 +8,7 @@ import { insertApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import { adminDb } from "./db";
 import { db } from "./db";
-import { users, applications, courses, universities } from "@shared/schema";
+import { users, applications, courses, universities, favorites } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
