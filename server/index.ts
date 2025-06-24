@@ -37,6 +37,15 @@ app.options("*", cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// ✅ Extract x-user-id and attach to request
+app.use((req, res, next) => {
+  const userId = req.header("x-user-id");
+  if (userId) {
+    (req as any).userId = userId;
+  }
+  next();
+});
+
 // ✅ Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
