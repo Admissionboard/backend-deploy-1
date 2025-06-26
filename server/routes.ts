@@ -138,7 +138,6 @@ app.get('/api/courses/:id', async (req, res) => {
   });
 
 
-
   // Application routes
   app.get('/api/applications', requireAuth, async (req: any, res) => {
     try {
@@ -214,6 +213,7 @@ app.get("/api/favorites", async (req, res) => {
         duration: courses.duration,
         tuitionFee: courses.tuitionFee,
         ieltsOverall: courses.ieltsOverall,
+        scholarships: courses.scholarships,
         university: {
           id: universities.id,
           name: universities.name,
