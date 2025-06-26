@@ -5,7 +5,7 @@ import { registerRoutes } from "./routes";
 const app = express();
 
 // ✅ Define allowed origins for production + local development
-const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:3000"];
+const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:5173"];
 
 
 app.use(cors({
