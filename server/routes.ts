@@ -198,7 +198,7 @@ app.get('/api/courses/:id', async (req, res) => {
     }
   });
 
-// ✅ Updated: Get all favorites with complete course info
+// ✅ GET all favorites for the current user
 app.get("/api/favorites", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
@@ -213,18 +213,16 @@ app.get("/api/favorites", async (req, res) => {
         duration: courses.duration,
         tuitionFee: courses.tuitionFee,
         ieltsOverall: courses.ieltsOverall,
-        ieltsListening: courses.ieltsListening,
-        ieltsReading: courses.ieltsReading,
-        ieltsWriting: courses.ieltsWriting,
-        ieltsSpeaking: courses.ieltsSpeaking,
-        startDates: courses.startDates,
-        faculty: courses.faculty,
         scholarships: courses.scholarships,
+        startDates: courses.startDates,
         university: {
           id: universities.id,
           name: universities.name,
           city: universities.city,
           country: universities.country,
+          qsRanking: universities.qsRanking,
+          ukRanking: universities.ukRanking,
+          google_map_url: universities.google_map_url,
         },
       },
     })
