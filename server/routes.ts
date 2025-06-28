@@ -206,24 +206,28 @@ app.get("/api/favorites", async (req, res) => {
   const userFavorites = await db
     .select({
       id: favorites.id,
-      course: {
+     course: {
   id: courses.id,
   name: courses.name,
   level: courses.level,
   duration: courses.duration,
   tuitionFee: courses.tuitionFee,
   ieltsOverall: courses.ieltsOverall,
-  scholarships: courses.scholarships,
-  startDates: courses.startDates,
+  ieltsListening: courses.ieltsListening,
+  ieltsReading: courses.ieltsReading,
+  ieltsWriting: courses.ieltsWriting,
+  ieltsSpeaking: courses.ieltsSpeaking,
   university: {
     id: universities.id,
     name: universities.name,
     city: universities.city,
     country: universities.country,
-    googleMapUrl: universities.googleMapUrl,
     qsRanking: universities.qsRanking,
     ukRanking: universities.ukRanking,
+    googleMapUrl: universities.googleMapUrl,
   },
+  scholarships: courses.scholarships,
+  startDates: courses.startDates,
 },
     })
     .from(favorites)
