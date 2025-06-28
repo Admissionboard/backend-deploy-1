@@ -206,27 +206,37 @@ app.get("/api/favorites", async (req, res) => {
   const userFavorites = await db
     .select({
       id: favorites.id,
-     course: {
-  id: courses.id,
-  name: courses.name,
-  level: courses.level,
-  duration: courses.duration,
-  tuitionFee: courses.tuition_fee,
-  ieltsOverall: courses.ielts_overall,
-  ieltsListening: courses.ielts_listening,
-  ieltsReading: courses.ielts_reading,
-  ieltsWriting: courses.ielts_writing,
-  ieltsSpeaking: courses.ielts_speaking,
-  university: {
-    id: universities.id,
-    name: universities.name,
-    city: universities.city,
-    country: universities.country,
-    qsRanking: universities.qsRanking,
-    ukRanking: universities.ukRanking,
-    googleMapUrl: universities.google_map_url,
-  },
-},
+      course: {
+        id: courses.id,
+        name: courses.name,
+        level: courses.level,
+        duration: courses.duration,
+        tuitionFee: courses.tuition_fee,
+        ieltsOverall: courses.ielts_overall,
+        ieltsListening: courses.ielts_listening,
+        ieltsReading: courses.ielts_reading,
+        ieltsWriting: courses.ielts_writing,
+        ieltsSpeaking: courses.ielts_speaking,
+
+        // ✅ New Field: IELTS Minimum
+        ieltsMinimum: sql<number | null>`
+          LEAST(
+            ${courses.ielts_listening},
+            ${courses.ielts_reading},
+            ${courses.ielts_writing},
+            ${courses.ielts_speaking}
+          )`,
+
+        university: {
+          id: universities.id,
+          name: universities.name,
+          city: universities.city,
+          country: universities.country,
+          qsRanking: universities.qsRanking,
+          ukRanking: universities.ukRanking,
+          googleMapUrl: universities.google_map_url,
+        },
+      },
     })
     .from(favorites)
     .innerJoin(courses, eq(favorites.courseId, courses.id))
