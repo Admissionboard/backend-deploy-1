@@ -46,6 +46,8 @@ export const universities = pgTable("universities", {
   country: varchar("country").notNull(),
   googleMapUrl: varchar("google_map_url"),
   imageUrl: varchar("image_url"),
+  qsRanking: varchar("qsRanking"),
+  ukRanking: integer("ukRanking"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
