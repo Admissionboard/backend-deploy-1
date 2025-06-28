@@ -7,15 +7,11 @@ const app = express();
 // ✅ Define allowed origins for production + local development
 const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:5173"];
 
-
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow curl, mobile
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
 }));
