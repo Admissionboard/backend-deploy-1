@@ -207,27 +207,24 @@ app.get("/api/favorites", async (req, res) => {
     .select({
       id: favorites.id,
       course: {
-        id: courses.id,
-        name: courses.name,
-        level: courses.level,
-        duration: courses.duration,
-        tuitionFee: courses.tuition_fee,
-        ieltsOverall: courses.ielts_overall,
-        ieltsListening: courses.ielts_listening,
-        ieltsReading: courses.ielts_reading,
-        ieltsWriting: courses.ielts_writing,
-        ieltsSpeaking: courses.ielts_speaking,
-
-        university: {
-          id: universities.id,
-          name: universities.name,
-          city: universities.city,
-          country: universities.country,
-          qsRanking: universities.qsRanking,
-          ukRanking: universities.ukRanking,
-          googleMapUrl: universities.google_map_url,
-        },
-      },
+  id: courses.id,
+  name: courses.name,
+  level: courses.level,
+  duration: courses.duration,
+  tuitionFee: courses.tuitionFee,
+  ieltsOverall: courses.ieltsOverall,
+  scholarships: courses.scholarships,
+  startDates: courses.startDates,
+  university: {
+    id: universities.id,
+    name: universities.name,
+    city: universities.city,
+    country: universities.country,
+    googleMapUrl: universities.googleMapUrl,
+    qsRanking: universities.qsRanking,
+    ukRanking: universities.ukRanking,
+  },
+},
     })
     .from(favorites)
     .innerJoin(courses, eq(favorites.courseId, courses.id))
