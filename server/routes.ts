@@ -218,15 +218,6 @@ app.get("/api/favorites", async (req, res) => {
         ieltsWriting: courses.ielts_writing,
         ieltsSpeaking: courses.ielts_speaking,
 
-        // ✅ New Field: IELTS Minimum
-        ieltsMinimum: sql<number | null>`
-          LEAST(
-            ${courses.ielts_listening},
-            ${courses.ielts_reading},
-            ${courses.ielts_writing},
-            ${courses.ielts_speaking}
-          )`,
-
         university: {
           id: universities.id,
           name: universities.name,

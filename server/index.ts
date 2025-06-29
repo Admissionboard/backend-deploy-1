@@ -4,26 +4,33 @@ import { registerRoutes } from "./routes";
 
 const app = express();
 
-// ✅ Define allowed origins
+// ✅ Define allowed origins for production + local development
 const allowedOrigins = ["https://www.studyinuk.co", "http://localhost:5173"];
 
-const corsOptions: cors.CorsOptions = {
+
+app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+    if (!origin) return callback(null, true); // allow curl, mobile
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      return callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-};
+}));
 
-// ✅ Apply CORS to all routes including preflight
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
-// ✅ Parse incoming JSON bodies
-app.use(express.json());
+app.options("*", cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
 
 // ✅ Allow all OPTIONS preflight responses
 app.options("*", (req, res) => {
